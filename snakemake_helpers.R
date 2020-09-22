@@ -1,3 +1,4 @@
+# snakemake_helpers.R
 
 #----- Function to load or install require packages -----#
 

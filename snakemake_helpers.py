@@ -1,4 +1,4 @@
-# hecatomb_helpers.py
+# snakemake_helpers.py
 
 import glob
 import os
