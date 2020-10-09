@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import shutil
+import gzip
 
 def build_search_patterns(read_pattern_list, read_extension_list):
 
@@ -49,9 +50,9 @@ def rename_files(config):
 	# Check that there's stuff in inputFileList
 	if (len(inputFileList) != 0):
 	
-		for inputFileName in inputFileList:
+		for inputFile in inputFileList:
 	
-			inputFileName = os.path.basename(inputFileName)
+			inputFileName = os.path.basename(inputFile)
 			index = -1
 			pattern  = ""
 			extension = ""
@@ -88,17 +89,23 @@ def rename_files(config):
 			# Extract the sample name + the read designator, and replace everything that may come after with _R[12].fastq.gz
 			newFileName = inputFileName[:index] + "_" + readType + extension
 
-					# Check that the /data/renamed directory exists (I don't want to rename original sequence files!)
+			# Check that the /data/renamed directory exists (I don't want to rename original sequence files!)
 			if not os.path.exists(READDIR + "/renamed"):
 				os.makedirs(READDIR + "/renamed")
 	
-					# Copy the original files to the /data/renamed directory
+			# Copy the original files to the /data/renamed directory
 			shutil.copy(READDIR + "/" + inputFileName, READDIR + "/renamed/" + inputFileName)
 	
-					# Rename the files within the /data/renamed directory
+			# Rename the files within the /data/renamed directory
 			os.rename(READDIR + "/renamed/" + inputFileName, READDIR + "/renamed/" + newFileName)
-	
-					# Once renamed, move the original files from the data directory to the archived directory so snake won't rename them again next time
+			# Check if the new file name ends with a ".gz," and if not, gzip the file
+			if not newFileName.endswith(".gz"):
+				newGZFile = READDIR + "/renamed/" + newFileName + ".gz"
+				with open(inputFile, "rb") as f_in, gzip.open(newGZFile, "wb") as f_out:
+					f_out.writelines(f_in)
+
+
+			# Once renamed, move the original files from the data directory to the archived directory so snake won't rename them again next time
 			if not os.path.exists(READDIR + "/archived"):
 				os.makedirs(READDIR + "/archived")
 			shutil.move(READDIR + "/" + inputFileName, READDIR + "/archived/" + inputFileName)
