@@ -20,14 +20,13 @@ def build_search_patterns(read_pattern_list, read_extension_list):
 
 		return(search_pattern_list)
 
-def rename_files(config):
+def rename_files(config, include_idx = False):
 
 	READDIR = config["Paths"]["Reads"]
 	
 	# If there are valid read files sitting in /data, rename them for consistency:
 	
-	# First, build all possible read file patterns depending on Patterns in config file
-	
+	# First, build all possible read file patterns depending on Patterns in config file (these will always be there)
 	read1Patterns = config["Patterns"]["Read1Identifiers"]
 	read2Patterns = config["Patterns"]["Read2Identifiers"]
 	readExtensions = config["Patterns"]["ReadExtensions"]
@@ -35,16 +34,26 @@ def rename_files(config):
 	allRead1Patterns = build_search_patterns(read1Patterns, readExtensions)
 	allRead2Patterns = build_search_patterns(read2Patterns, readExtensions)
 	
-	# Second, go look in the /data/ directory for any files matching these patterns and store in a list
+	# Second, go look in the READDIR directory for any files matching these patterns and store in a list
 	allPatternsList = allRead1Patterns + allRead2Patterns
+
+	# If we need to include index files:
+	if (include_idx == True):
+		index1Patterns = config["Patterns"]["Index1Identifiers"]
+		index2Patterns = config["Patterns"]["Index2Identifiers"]
+
+		allIndex1Patterns = build_search_patterns(index1Patterns, readExtensions)
+		allIndex2Patterns = build_search_patterns(index2Patterns, readExtensions)
+
+		allPatternsList = allPatternsList + index1Patterns + index2Patterns
 		
 	inputFileList = []
 	
 	for pattern in allPatternsList:
 		inputFileList.extend(glob.glob(READDIR + "/" + pattern))
 	
-	# Third, if there are any valid files in he /data/ directory, rename them with a consistent structure and store in /data/renamed/
-	# Original files with original file names will be moved to the /data/archived/ directory after renaming is complete
+	# Third, if there are any valid files in the READDIR directory, rename them with a consistent structure and store in /READDIR/renamed/
+	# Original files with original file names will be moved to the /READDIR/archived/ directory after renaming is complete
 	
 	# Check that there's stuff in inputFileList
 	if (len(inputFileList) != 0):
