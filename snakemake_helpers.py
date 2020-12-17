@@ -20,7 +20,7 @@ def build_search_patterns(read_pattern_list, read_extension_list):
 
 		return(search_pattern_list)
 
-def rename_files(config, include_idx = False):
+def rename_files(config):
 
 	READDIR = config["Paths"]["Reads"]
 	
@@ -29,24 +29,18 @@ def rename_files(config, include_idx = False):
 	# First, build all possible read file patterns depending on Patterns in config file (these will always be there)
 	read1Patterns = config["Patterns"]["Read1Identifiers"]
 	read2Patterns = config["Patterns"]["Read2Identifiers"]
+	index1Patterns = config["Patterns"]["Index1Identifiers"]
+	index2Patterns = config["Patterns"]["Index2Identifiers"]
 	readExtensions = config["Patterns"]["ReadExtensions"]
 	
 	allRead1Patterns = build_search_patterns(read1Patterns, readExtensions)
 	allRead2Patterns = build_search_patterns(read2Patterns, readExtensions)
+	allIndex1Patterns = build_search_patterns(index1Patterns, readExtensions)
+	allIndex2Patterns = build_search_patterns(index2Patterns, readExtensions)
 	
 	# Second, go look in the READDIR directory for any files matching these patterns and store in a list
-	allPatternsList = allRead1Patterns + allRead2Patterns
+	allPatternsList = allRead1Patterns + allRead2Patterns + index1Patterns + index2Patterns
 
-	# If we need to include index files:
-	if (include_idx == True):
-		index1Patterns = config["Patterns"]["Index1Identifiers"]
-		index2Patterns = config["Patterns"]["Index2Identifiers"]
-
-		allIndex1Patterns = build_search_patterns(index1Patterns, readExtensions)
-		allIndex2Patterns = build_search_patterns(index2Patterns, readExtensions)
-
-		allPatternsList = allPatternsList + index1Patterns + index2Patterns
-		
 	inputFileList = []
 	
 	for pattern in allPatternsList:
