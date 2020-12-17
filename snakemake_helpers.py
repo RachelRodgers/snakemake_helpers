@@ -40,7 +40,8 @@ def rename_files(config):
 	allIndex2Patterns = build_search_patterns(index2Patterns, readExtensions)
 	
 	# Second, go look in the READDIR directory for any files matching these patterns and store in a list
-	allPatternsList = allRead1Patterns + allRead2Patterns + index1Patterns + index2Patterns
+	allPatternsList = allRead1Patterns + allRead2Patterns + allIndex1Patterns + allIndex2Patterns
+	print(allPatternsList)
 
 	inputFileList = []
 	
@@ -74,7 +75,7 @@ def rename_files(config):
 					readType = "R1"
 					break
 	
-			# If you can't find an R1 pattern, look for an R2 pattern
+			# No R1: look for an R2 pattern
 			if index == -1:
 				for read2Pattern in read2Patterns:
 					index = inputFileName.find(read2Pattern)
@@ -82,10 +83,28 @@ def rename_files(config):
 						pattern = read2Pattern
 						readType = "R2"
 						break
-	
-			# If you can't find the R1 or R2 designator something's probably wrong, stop
+
+			# No R1 or R2: look for an I1 pattern
 			if index == -1:
-				sys.stderr.write("No R1 or R2 pattern found in " + inputFileName)
+				for index1Pattern in index1Patterns:
+					index = inputFileName.find(index1Pattern)
+					if index != -1:
+						pattern = index1Pattern
+						readType = "I1"
+						break
+			
+			# No R1, R2, or I1: look for an I2 pattern
+			if index == -1:
+				for index2Pattern in index2Patterns:
+					index = inputFileName.find(index2Pattern)
+					if index != -1:
+						pattern = index2Pattern
+						readType = "I2"
+						break
+	
+			# If you can't find any of those designator something's probably wrong, stop
+			if index == -1:
+				sys.stderr.writdxqe("No R1 or R2 pattern found in " + inputFileName)
 				sys.exit()
 	
 			# Otherwise, let's build the new name
@@ -112,5 +131,6 @@ def rename_files(config):
 			if not os.path.exists(READDIR + "/archived"):
 				os.makedirs(READDIR + "/archived")
 			shutil.move(READDIR + "/" + inputFileName, READDIR + "/archived/" + inputFileName)
+
 
 
