@@ -7,6 +7,20 @@ import sys
 import shutil
 import gzip
 
+def get_new_names(config):
+	MAP = config["Paths"]["Map"]
+	nameList = []
+	mappingFile = open(MAP)
+
+	next(mappingFile) # skip first line (header)
+
+	for line in mappingFile:
+		lineSplit = line.split("\t")
+		nameList.append(lineSplit[0])
+
+	mappingFile.close()
+	return(nameList)
+
 def build_search_patterns(read_pattern_list, read_extension_list):
 
 		search_pattern_list = []
