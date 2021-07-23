@@ -7,6 +7,33 @@ import sys
 import shutil
 import gzip
 
+def empty_file_check(config):
+	READDIR = config["Paths"]["Reads"]
+	EMPTYDIR = os.path.join(READDIR + "/empty")
+	RENAMEDDIR = os.path.join(READDIR + "/renamed")
+
+	# make directory to hold empty files
+	if not os.path.exists(EMPTYDIR):
+		os.makedirs(EMPTYDIR)
+
+	# check for empty R1 files, if empty, move R1 and mate to empty dir
+	read1Files = glob.glob(os.path.join(RENAMEDDIR, "*R1*"))
+
+	for r1 in read1Files:
+		r2 = re.sub("R1", "R2", r1)
+		print("Looking at " + r1 + " and " + r2)
+		# open the R1 file and count the number of ">" characters
+		sequenceFile = gzip.open(r1, "rt")
+		data = sequenceFile.read()
+		numSeqs = data.count(">")
+		print("Number of sequences is " + str(numSeqs))
+		sequenceFile.close()
+
+		if numSeqs == 0:
+			print (r1 + "is empty")
+			shutil.move(r1, EMPTYDIR)
+			shutil.move(r2, EMPTYDIR)
+
 def get_new_names(config):
 	MAP = config["Paths"]["Map"]
 	nameList = []
